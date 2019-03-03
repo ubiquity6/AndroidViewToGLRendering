@@ -1,20 +1,20 @@
 package com.self.viewtoglrendering;
 
 import android.opengl.GLSurfaceView;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.self.viewtoglrendering.cuberenerer.CubeGLRenderer;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends AppCompatActivity {
 
     private GLSurfaceView mGLSurfaceView;
-    private GLRenderable mGLLinearLayout;
-    private WebView mWebView;
+    private GLWebView mWebView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,17 +28,33 @@ public class MainActivity extends ActionBarActivity {
         ViewToGLRenderer viewToGlRenderer = new CubeGLRenderer(this);
 
         mGLSurfaceView = (GLSurfaceView) findViewById(R.id.gl_surface_view);
-        mGLLinearLayout = (GLRenderable) findViewById(R.id.gl_layout);
-        mWebView = (WebView) findViewById(R.id.web_view);
+        mWebView = (GLWebView) findViewById(R.id.web_view);
 
         mGLSurfaceView.setEGLContextClientVersion(2);
+        mGLSurfaceView.setPreserveEGLContextOnPause(true);
         mGLSurfaceView.setRenderer(viewToGlRenderer);
 
-        mGLLinearLayout.setViewToGLRenderer(viewToGlRenderer);
+//        mGLSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 16, 0); // Alpha used for plane blending.
 
-        mWebView.setWebViewClient(new WebViewClient());
-        mWebView.setWebChromeClient(new WebChromeClient());
-        mWebView.loadUrl("http://stackoverflow.com/questions/12499396/is-it-possible-to-render-an-android-view-to-an-opengl-fbo-or-texture");
+
+        mWebView.setViewToGLRenderer(viewToGlRenderer);
+
+        //mWebView.setWebViewClient(new WebViewClient());
+        //mWebView.setWebChromeClient(new WebChromeClient());
+
+        this.mWebView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                view.setBackgroundColor(0x00000000);
+            }
+        });
+
+        mWebView.setWebContentsDebuggingEnabled(true);
+        WebSettings webSettings = mWebView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setMediaPlaybackRequiresUserGesture(false);
+        mWebView.loadUrl("https://demos.littleworkshop.fr/infinitown");
     }
 
 
