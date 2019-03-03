@@ -15,7 +15,7 @@ import javax.microedition.khronos.opengles.GL10;
 /**
  * Created by user on 3/12/15.
  */
-public class ViewToGLRenderer implements GLSurfaceView.Renderer {
+public class ViewToGLRenderer implements GLSurfaceView.Renderer, SurfaceTexture.OnFrameAvailableListener {
 
     private static final String TAG = ViewToGLRenderer.class.getSimpleName();
 
@@ -30,13 +30,17 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
 
     private int mTextureWidth = DEFAULT_TEXTURE_WIDTH;
     private int mTextureHeight = DEFAULT_TEXTURE_HEIGHT;
+    private boolean mNewFrameAvailable = false;
 
 
     @Override
     public void onDrawFrame(GL10 gl){
-        synchronized (this){
-            // update texture
-            mSurfaceTexture.updateTexImage();
+        if(mNewFrameAvailable) {
+            synchronized (this){
+                mNewFrameAvailable = false;
+                // update texture
+                mSurfaceTexture.updateTexImage();
+            }
         }
    }
 
@@ -50,7 +54,16 @@ public class ViewToGLRenderer implements GLSurfaceView.Renderer {
             mSurfaceTexture = new SurfaceTexture(mGlSurfaceTexture);
             mSurfaceTexture.setDefaultBufferSize(mTextureWidth, mTextureHeight);
             mSurface = new Surface(mSurfaceTexture);
+
+            mSurfaceTexture.setOnFrameAvailableListener( this);
         }
+
+    }
+
+    @Override
+    public void onFrameAvailable(SurfaceTexture var1) {
+        Log.d(TAG, "NEW frame available");
+        mNewFrameAvailable = true;
 
     }
 
